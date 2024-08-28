@@ -10,7 +10,7 @@ moda(x)
 \item{x}{The vetor or data frame}
 }
 \value{
-The mode as a vector or in a data frame. If there are multiples modes, it return a list with the variables with multiples modes.
+Returns a list with the result and the warning with the variables with multiple modes or empty otherwise.
 }
 \description{
 If the input is a data frame, it calcule the mode of each column. If there are many modes, only returns the first.

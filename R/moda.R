@@ -4,7 +4,7 @@
 #'
 #' @param x The vetor or data frame
 #'
-#' @return The mode as a vector or in a data frame. If there are multiples modes, it return a list with the variables with multiples modes.
+#' @return Returns a list with the result and the warning with the variables with multiple modes or empty otherwise.
 #' @export
 #'
 #' @examples
@@ -19,7 +19,8 @@ moda <- function(x){
          retorno <- list(result = as.numeric(names(which.max(table(x)))), warning = 'Varias modas')
          return(retorno)
       } else {
-         return(as.numeric(names(which.max(table(x)))))
+         retorno <- list(result = as.numeric(names(which.max(table(x)))), warning = 'Moda \\u00fanica')
+         return(retorno)
       }
    } else  {
       resultado <- matrix(ncol = ncol(x))
@@ -35,7 +36,10 @@ moda <- function(x){
             mensaje[i] <- ''
          }
       }
-      mensaje <- mensaje[mensaje!='']
+      mensaje <- mensaje[mensaje != '']
+      if (length(mensaje) == 0) {
+         mensaje <- 'Las modas son \\u00fanicas'
+      }
       resultado <- as.data.frame(resultado)
       colnames(resultado) <- colnames(x)
       rownames(resultado) <- 'Moda'
