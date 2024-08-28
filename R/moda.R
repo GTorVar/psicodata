@@ -19,7 +19,7 @@ moda <- function(x){
          retorno <- list(result = as.numeric(names(which.max(table(x)))), warning = 'Varias modas')
          return(retorno)
       } else {
-         retorno <- list(result = as.numeric(names(which.max(table(x)))), warning = 'Moda \\u00fanica')
+         retorno <- list(result = as.numeric(names(which.max(table(x)))), warning = 'Solo una moda')
          return(retorno)
       }
    } else  {
@@ -38,7 +38,7 @@ moda <- function(x){
       }
       mensaje <- mensaje[mensaje != '']
       if (length(mensaje) == 0) {
-         mensaje <- 'Las modas son \\u00fanicas'
+         mensaje <- 'Variables con una moda'
       }
       resultado <- as.data.frame(resultado)
       colnames(resultado) <- colnames(x)
