@@ -4,7 +4,8 @@
 #'
 #' @param datos Data frame with data, variables in columns
 #' @param na.rm Remove the NA
-#' @param sktype The skewness formula: 'fisher' and 'pearson'
+#' @param sktype The skewness formula: 'fisher' or 'pearson'
+#' @param kurtype The kurtosis formula: 'beta2' or 'g2'
 #' @param mardia Include the Mardia's skewness and kurtosis (multivariate)?
 #' @param plot Plot the multivariate Q-Q plot
 #'
@@ -20,52 +21,49 @@
 #'                   c=sample(1:10, 100, replace =TRUE))
 #' est.forma(x)
 #'
-est.forma <- function(datos, na.rm = TRUE, sktype = 'fisher', mardia = TRUE,
-                      plot = FALSE){
+est.forma <- function(datos, na.rm = TRUE, sktype = 'fisher', kurtype = 'beta2',
+                      mardia = FALSE, plot = FALSE){
 
-   desvest <- matrix(data = NA, ncol = ncol(datos))
+   if (length(sktype) > 1 | length(kurtype) > 1) warning('Solo un argumento en sktype o kurtype')
+
+
+   datos <- as.data.frame(datos)
+
+   alpha1 <- apply(datos, 2, function(x) sum(x, na.rm = na.rm)/length(x))
+   alpha2 <- apply(datos, 2, function(x) sum(x^2, na.rm = na.rm)/length(x))
+   alpha3 <- apply(datos, 2, function(x) sum(x^3, na.rm = na.rm)/length(x))
+   alpha4 <- apply(datos, 2, function(x) sum(x^4, na.rm = na.rm)/length(x))
+   desvest <- apply(datos, 2, stats::sd)
 
    if ('fisher' %in% sktype) {
-      alpha1 <- matrix(data = NA, ncol = ncol(datos))
-      alpha2 <- matrix(data = NA, ncol = ncol(datos))
-      alpha3 <- matrix(data = NA, ncol = ncol(datos))
-      mu3 <- matrix(data = NA, ncol = ncol(datos))
-      fisherAs <- matrix(data = NA, ncol = ncol(datos))
-      for (i in seq_along(colnames(datos))) {
-         alpha1[i] <- sum(datos[[i]], na.rm = na.rm)/length(datos[[i]])
-         alpha2[i] <- sum(datos[[i]]^2, na.rm = na.rm)/length(datos[[i]])
-         alpha3[i] <- sum(datos[[i]]^3, na.rm = na.rm)/length(datos[[i]])
-         mu3[i] <- (alpha3[i] - 3* alpha1[i] * alpha2[i] + 2* (alpha1[i]^3))
-         desvest[i] <- sqrt((sum(datos[[i]]^2, na.rm = na.rm)-length(datos[[i]]) * mean(datos[[i]], na.rm = na.rm)^2)/(length(datos[[i]])-1))
-         fisherAs[i] <- mu3[[i]]/(desvest[[i]]^3)
-      }
-      fisherAs <- as.data.frame(fisherAs)
-      colnames(fisherAs) <- colnames(datos)
-      rownames(fisherAs) <- 'Asim. Fisher'
+      mu3 <- (alpha3 - 3* alpha1 * alpha2 + 2* (alpha1^3))
+      fisherAs <- mu3/(desvest^3)
    }
 
    if ('pearson' %in% sktype) {
-      pearsonas <- matrix(data = NA, ncol = ncol(datos))
-      for (i in seq_along(colnames(datos))) {
-         desvest[i] <- sqrt((sum(datos[[i]]^2, na.rm = na.rm)-length(datos[[i]]) * mean(datos[[i]], na.rm = na.rm)^2)/(length(datos[[i]])-1))
-         pearsonas[i] <- (mean(datos[[i]], na.rm = na.rm)-moda(x[[i]])$result)/desvest[[i]]
-      }
-      pearsonas <- as.data.frame(pearsonas)
-      colnames(pearsonas) <- colnames(datos)
-      rownames(pearsonas) <- 'Asim. Pearson'
+      medias <- apply(datos, 2, mean, na.rm = na.rm)
+      modas <- moda(datos)$result
+      pearsonAs <- (medias - modas) / desvest
+      rownames(pearsonAs) <- NULL
    }
 
-   forma <- data.frame(Asimetria = rep(0, ncol(datos)),
-                       Curtosis = rep(0, ncol(datos)))
-
-   for (i in seq_along(colnames(datos))) {
-      forma$Asimetria[i] <- if (sktype == 'fisher') fisherAs[[i]] else pearsonas[[i]]
-      forma$Curtosis[i] <- psych::kurtosi(datos[[i]], na.rm = na.rm, type = 2)
+   if ('beta2' %in% kurtype) {
+      mu4 <- alpha4 - 4 * alpha1 * alpha3 + 6 * alpha1^2 * alpha2 - 3 * alpha1^4
+      beta2 <-mu4/desvest^4
    }
 
+   if ('g2' %in% kurtype) {
+      mu4 <- alpha4 - 4 * alpha1 * alpha3 + 6 * alpha1^2 * alpha2 - 3 * alpha1^4
+      beta2 <-mu4/desvest^4
+      g2 <- beta2 - 3
+   }
+
+   forma <- data.frame(Asimetria = if (sktype == 'fisher') fisherAs else t(pearsonAs),
+                       Curtosis = if (kurtype == 'beta2') beta2 else g2)
+   rownames(forma) <- colnames(datos)
    forma <- round(forma, 3)
 
-   if (isTRUE(mardia)) {
+   if (isTRUE(mardia) && ncol(datos) >= 2) {
       Asimetria = psych::mardia(datos, na.rm = na.rm, plot = FALSE)$skew
       p.asimetria = psych::mardia(datos, na.rm = na.rm, plot = FALSE)$p.skew
       Curtosis = psych::mardia(datos, na.rm = na.rm, plot = FALSE)$kurtosis
@@ -77,10 +75,10 @@ est.forma <- function(datos, na.rm = TRUE, sktype = 'fisher', mardia = TRUE,
 
       resultado <- list(Forma = forma, Multivariado = mardia)
    } else {
-      resultado <- forma
+      resultado <- list(Forma = forma)
    }
 
-   if (isTRUE(plot)) {
+   if (isTRUE(plot) && ncol(datos) >= 2) {
       x <- as.matrix(datos)
       S <- cov(x)
       S.inv <- solve(S)
@@ -90,5 +88,7 @@ est.forma <- function(datos, na.rm = TRUE, sktype = 'fisher', mardia = TRUE,
       stats::qqline(d)
    }
 
-   return(list(resultado))
+   if (isTRUE(plot) && ncol(datos) <= 2) warning('Q-Q plot necesita al menos dos variables')
+
+   return(resultado)
 }

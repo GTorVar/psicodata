@@ -2,57 +2,26 @@
 % Please edit documentation in R/descriptivos.R
 \name{descriptivos}
 \alias{descriptivos}
-\title{Descriptives}
+\title{Descriptivos}
 \usage{
-descriptivos(
-  x,
-  na.rm = TRUE,
-  interp = FALSE,
-  skew = TRUE,
-  ranges = TRUE,
-  trim = 0.1,
-  type = 3,
-  check = TRUE,
-  fast = NULL,
-  quant = NULL,
-  IQR = FALSE,
-  omit = FALSE,
-  data = NULL,
-  size = 50
-)
+descriptivos(x, na.rm = TRUE, trim = 0.1)
 }
 \arguments{
-\item{x}{A data frame or matrix}
+\item{x}{Conjunto de datos}
 
-\item{na.rm}{The default is to delete missing data. na.rm=TRUE will delete the case}
+\item{na.rm}{Omitir valores perdidos}
 
-\item{interp}{Should the median be standard or interpolated}
-
-\item{skew}{Should the median be standard or interpolated}
-
-\item{ranges}{Should the range be calculated?}
-
-\item{trim}{trim=.1 – trim means by dropping the top and bottom trim fraction}
-
-\item{type}{Which estimate of skew and kurtosis should be used?}
-
-\item{check}{Should we check for non-numeric variables? Slower but helpful.}
-
-\item{fast}{If TRUE, will do n, means, sds, min, max, ranges for an improvement in speed. If NULL, will switch to fast mode for large (ncol * nrow > 10^7) problems, otherwise defaults to fast = FALSE}
-
-\item{quant}{If not NULL, will find the specified quantiles (e.g. quant=c(.25,.75) will find the 25th and 75th percentiles)}
-
-\item{IQR}{If TRUE, show the interquartile range}
-
-\item{omit}{Do not convert non-numerical variables to numeric, omit them instead}
-
-\item{data}{Allows formula input for specific grouping variables}
-
-\item{size}{For very big problems (in terms of nvar) set size to some reasonable value}
+\item{trim}{Valor de la media recortada}
 }
 \value{
-Please, visit the \link{psych} package, this is only a language adaptation
+Una tabla con los valores
 }
 \description{
-This is \code{\link[psych:describe]{psych::describe()}} function translate into Spanish. All the params are equal to original function.
+Devuelve los estadísticos descriptivos habituales.
+}
+\examples{
+x <- data.frame(a=sample(1:10, 100, replace =TRUE),
+                  b=sample(1:10, 100, replace =TRUE),
+                  c=sample(1:10, 100, replace =TRUE))
+descriptivos(x)
 }

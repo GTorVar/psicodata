@@ -1,54 +1,42 @@
-#' Descriptives
+#' Descriptivos
 #'
-#' This is [psych::describe()] function translate into Spanish. All the params are equal to original function.
+#' Devuelve los estadísticos descriptivos habituales.
 #'
-#' @param x A data frame or matrix
-#' @param na.rm The default is to delete missing data. na.rm=TRUE will delete the case
-#' @param interp Should the median be standard or interpolated
-#' @param skew Should the median be standard or interpolated
-#' @param ranges Should the range be calculated?
-#' @param trim trim=.1 – trim means by dropping the top and bottom trim fraction
-#' @param type Which estimate of skew and kurtosis should be used?
-#' @param check Should we check for non-numeric variables? Slower but helpful.
-#' @param fast If TRUE, will do n, means, sds, min, max, ranges for an improvement in speed. If NULL, will switch to fast mode for large (ncol * nrow > 10^7) problems, otherwise defaults to fast = FALSE
-#' @param quant If not NULL, will find the specified quantiles (e.g. quant=c(.25,.75) will find the 25th and 75th percentiles)
-#' @param IQR If TRUE, show the interquartile range
-#' @param omit Do not convert non-numerical variables to numeric, omit them instead
-#' @param data Allows formula input for specific grouping variables
-#' @param size For very big problems (in terms of nvar) set size to some reasonable value
+#' @param x Conjunto de datos
+#' @param na.rm Omitir valores perdidos
+#' @param trim Valor de la media recortada
 #'
-#' @return Please, visit the [psych] package, this is only a language adaptation
+#' @return Una tabla con los valores
 #'
-#' @importFrom psych describe
+#' @importFrom stats median
 #'
 #' @export
 #'
 #' @examples
-descriptivos <- function(x, na.rm = TRUE, interp=FALSE,skew = TRUE, ranges = TRUE,trim=.1,
-                         type=3,check=TRUE,fast=NULL,quant=NULL,IQR=FALSE,omit=FALSE,data=NULL,
-                         size=50){
-   tabla <- as.data.frame(psych::describe(x, na.rm = na.rm, interp=interp,skew = skew, ranges = ranges,trim=trim,
-                                          type=type,check=check,fast=fast,quant=quant,IQR=IQR,omit=omit,data=data,
-                                          size=size))
-   nombres <- c('Variables', 'N', 'Media', 'Des. Tipica',  'Error std')
+#' x <- data.frame(a=sample(1:10, 100, replace =TRUE),
+#'                   b=sample(1:10, 100, replace =TRUE),
+#'                   c=sample(1:10, 100, replace =TRUE))
+#' descriptivos(x)
 
-   if (!is.null(tabla$range)) {
-      nombres <- append(nombres, c('Mediana', 'Min', 'Max', 'Rango'), after = length(nombres)-1)
-   } else {
-      nombres <- nombres
-   }
+descriptivos <- function(x, na.rm = TRUE, trim = .1){
 
-   if (!is.null(tabla$skew)) {
-      nombres <- append(nombres, c('Asimetria', 'Curtosis'), after = length(nombres)-1)
-   } else {
-      nombres <- nombres
-   }
+   Minimo = apply(x, 2, min)
+   Maximo = apply(x, 2, max)
+   Desv.Tipica = apply(x, 2, function(x) sqrt((sum(x^2, na.rm = na.rm)-length(x)*mean(x, na.rm = na.rm)^2)/(length(x)-1)))
 
-   if (!is.null(tabla$skew) && !is.null(tabla$range)) {
-      nombres <- append(nombres, c('M. recotrada', 'MAD'), after = 5)
-   } else {
-      nombres <- nombres
-   }
-   colnames(tabla) <- nombres
-   return(round(tabla, 2))
+   tabla <- data.frame(N = apply(x, 2, length),
+      Perdidos = apply(x, 2, function(x) sum(is.na(x))),
+      Media = apply(x, 2, mean, na.rm = na.rm),
+      Media.recortada = apply(x, 2, mean, na.rm = na.rm, trim = trim),
+      Mediana = apply(x, 2, median, na.rm = na.rm),
+      Moda = apply(x, 2, function(x) moda(x)$result),
+      Minimo = Minimo,
+      Maximo = Maximo,
+      Rango = Maximo - Minimo,
+      Desv.Tipica = Desv.Tipica,
+      Error.Estandar = Desv.Tipica/(length(x)-1) )
+
+   tabla <- round(tabla, 2)
+
+   return(tabla)
 }

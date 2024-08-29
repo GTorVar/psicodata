@@ -4,14 +4,23 @@
 \alias{est.forma}
 \title{Skewness and kurtosis}
 \usage{
-est.forma(datos, na.rm = TRUE, sktype = "fisher", mardia = TRUE, plot = FALSE)
+est.forma(
+  datos,
+  na.rm = TRUE,
+  sktype = "fisher",
+  kurtype = "beta2",
+  mardia = FALSE,
+  plot = FALSE
+)
 }
 \arguments{
 \item{datos}{Data frame with data, variables in columns}
 
 \item{na.rm}{Remove the NA}
 
-\item{sktype}{The skewness formula: 'fisher' and 'pearson'}
+\item{sktype}{The skewness formula: 'fisher' or 'pearson'}
+
+\item{kurtype}{The kurtosis formula: 'beta2' or 'g2'}
 
 \item{mardia}{Include the Mardia's skewness and kurtosis (multivariate)?}
 

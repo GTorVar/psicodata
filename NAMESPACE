@@ -3,5 +3,5 @@
 export(descriptivos)
 export(est.forma)
 export(moda)
-importFrom(psych,describe)
 importFrom(stats,cov)
+importFrom(stats,median)
