@@ -14,7 +14,7 @@ moda <- function(x){
    #Sirve para vectores y data.frames
    if (is.vector(x)) {
       completa <- as.data.frame(table(x))
-      sin_primera_moda <- as.data.frame(table(x[-(as.numeric(names(which.max(table(x)))))]))
+      sin_primera_moda <- as.data.frame(table(x)[-(as.numeric(names(which.max(table(x)))))])
       if (completa$Freq[which.max(completa$Freq)]==sin_primera_moda$Freq[which.max(sin_primera_moda$Freq)]) {
          retorno <- list(result = as.numeric(names(which.max(table(x)))), warning = 'Varias modas')
          return(retorno)

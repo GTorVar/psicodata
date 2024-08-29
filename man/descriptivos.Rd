@@ -54,5 +54,5 @@ descriptivos(
 Please, visit the \link{psych} package, this is only a language adaptation
 }
 \description{
-This is \code{psych::describe()} function translate into Spanish. All the params are equal to original function.
+This is \code{\link[psych:describe]{psych::describe()}} function translate into Spanish. All the params are equal to original function.
 }
